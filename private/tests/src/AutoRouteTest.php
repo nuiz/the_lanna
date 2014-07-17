@@ -10,6 +10,11 @@ use Main\AutoRoute;
 
 class AutoRouteTest extends \PHPUnit_Framework_TestCase {
     public function testReadCTL(){
-        $routes = AutoRoute::readCTL();
+        AutoRoute::readCTL();
+    }
+
+    public function testMapCTL(){
+        $route = AutoRoute::mapAllCTL();
+        $getContact = $route->match("/contact", "post");
     }
 }

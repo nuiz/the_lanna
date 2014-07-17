@@ -27,10 +27,4 @@ class DB {
         }
         return self::$db;
     }
-
-    public static function __destruct(){
-        if(!is_null(self::$mongo)){
-            //self::$mongo->close(true);
-        }
-    }
 }

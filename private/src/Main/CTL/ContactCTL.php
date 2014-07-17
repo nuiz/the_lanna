@@ -18,14 +18,14 @@ class ContactCTL extends BaseCTL {
      * @GET
      */
     public function get(){
-        $contact = ContactService::instance()->get();
+        $contact = ContactService::instance()->get($this->getCtx());
         return $contact;
     }
     /**
-     * @POST
+     * @PUT
      */
-    public function edit($params){
-        $contact = ContactService::instance()->edit($params);
+    public function edit(){
+        $contact = ContactService::instance()->edit($this->reqInfo->params(), $this->getCtx());
         return $contact;
     }
 }
