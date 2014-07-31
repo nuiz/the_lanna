@@ -10,11 +10,41 @@ namespace Main;
 
 
 use DocBlock\Parser;
+use Main\Http\RequestInfo;
 
 
 class AutoRoute {
-    public static function register(){
+    public static function dispatch(){
+        $route = self::mapAllCTL();
+        $match = $route->match();
 
+        if($match['target']){
+            $reqInfo = RequestInfo::loadFromGlobal(array("url_params"=> $match['params']));
+            $ctl = new $match['target']['c']($reqInfo);
+            $response = $ctl->{$match['target']['a']}();
+            header("Content-type: application/json");
+            echo json_encode($response);
+            exit();
+        }
+        else {
+            header("HTTP/1.0 404 Not Found");
+            exit();
+        }
+    }
+
+    public static function mapAllCTL(){
+        $router = new \AltoRouter();
+
+        $router->setBasePath('/de_lanna');
+        $ctls = self::readCTL();
+        foreach($ctls as $ctl){
+            $router->map(implode('|', $ctl['methods']), $ctl['uri'], array(
+                'c'=> $ctl['controller'],
+                'a'=> $ctl['action']
+            ));
+        }
+
+        return $router;
     }
 
     public static function readCTL(){
@@ -68,7 +98,7 @@ class AutoRoute {
                     $uri = $classUri.$uriParamAnns[0]->getValue();
                 }
 
-                $route = array('class'=> $className, 'methods'=> $HttpMethods, 'uri'=> $uri);
+                $route = array('controller'=> $className, 'action'=> $method->getName(),'methods'=> $HttpMethods, 'uri'=> $uri);
                 $routes[] = $route;
             }
         }
