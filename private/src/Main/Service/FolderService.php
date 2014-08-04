@@ -38,7 +38,7 @@ class FolderService extends BaseService {
         }
         $entity = $this->collection->findOne(array('_id'=> $_id));
         if(is_null($entity)){
-            return ResponseHelper::notFound("Room type not found");
+            return ResponseHelper::notFound("Folder not found");
         }
 
         $entity['thumb'] = Image::instance()->findByRef($entity['thumb'])->toArrayResponse();
@@ -53,7 +53,7 @@ class FolderService extends BaseService {
         $thumb = Image::instance()->add($params['thumb']);
         $entity['thumb'] = $thumb->getDBRef();
 
-        $entity['parent'] = 0;
+        $entity['parent'] = null;
         if(!empty($params['parent_id'])){
             $parent = $this->get($params['parent_id']);
             $parentRef = \MongoDBRef::create("folders", $parent['_id']);
@@ -97,12 +97,22 @@ class FolderService extends BaseService {
 
         $this->collection->update(array('_id'=> $_id), array('$set'=> $entity));
 
-        $entity = $this->db->folders->findOne(array('id'=> $_id));
+        //$entity = $this->db->folders->findOne(array('id'=> $_id));
         $entity['_id'] = $_id;
-        unset($entity['id']);
+        //unset($entity['id']);
+
         // Node service update
         NodeService::instance()->addOrEdit($entity, 'folder', $ctx);
 
         return $this->get($_id);
+    }
+
+    public function delete($_id){
+        if(!($_id instanceof \MongoId)){
+            $_id = new \MongoId($_id);
+        }
+
+        $this->collection->remove(array('_id'=> $_id));
+        NodeService::instance()->delete($_id);
     }
 }

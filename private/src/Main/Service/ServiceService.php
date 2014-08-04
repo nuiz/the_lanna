@@ -11,6 +11,7 @@ namespace Main\Service;
 
 use Main\Context\ContextInterface;
 use Main\DB;
+use Main\Helper\ArrayHelper;
 use Main\Helper\Image;
 use Main\Helper\ResponseHelper;
 
@@ -38,6 +39,11 @@ class ServiceService extends BaseService {
             return ResponseHelper::notFound("Room type not found");
         }
         $entity['thumb'] = Image::instance()->findByRef($entity['thumb'])->toArrayResponse();
+
+        // id
+        $entity['id'] = $entity['_id']->{'$id'};
+        unset($entity['_id']);
+
         return $entity;
     }
 
@@ -53,6 +59,7 @@ class ServiceService extends BaseService {
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
         }
+        $entity['type'] = 'service_food';
         $this->collection->insert($entity);
 
         // Node service update
@@ -79,6 +86,63 @@ class ServiceService extends BaseService {
         NodeService::instance()->addOrEdit($entity, 'service_room');
 
         return $this->get($entity['_id']);
+    }
+
+    public function edit($_id, array $params, ContextInterface $ctx = null){
+        if(is_null($ctx))
+            $ctx = $this->getCtx();
+
+        if(!($_id instanceof \MongoId)){
+            $_id = new \MongoId($_id);
+        }
+
+        $entity = $params;
+
+        if(isset($params['parent_id'])){
+            $parent = $this->get($params['parent_id']);
+            if(is_null($parent)){
+                throw new \Exception("Not found parent_id ".$params['parent_id']);
+            }
+            $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+
+            $entity['parent'] = $parentRef;
+            unset($entity['parent_id']);
+        }
+        if(isset($params['thumb'])){
+            $thumb = Image::instance()->add($params['thumb']);
+            $entity['thumb'] = $thumb->getDBRef();
+        }
+
+        // unset pictures for protected edit pictures
+        unset($entity["pictures"]);
+
+        $entity = ArrayHelper::ArrayGetPath($entity);
+
+        $this->collection->update(array('_id'=> $_id), array('$set'=> $entity));
+
+        $entity = $this->db->folders->findOne(array('id'=> $_id));
+        $entity['_id'] = $_id;
+        unset($entity['id']);
+        // Node service update
+        NodeService::instance()->addOrEdit($entity, 'folder', $ctx);
+
+        return $this->get($_id);
+    }
+
+    public function delete($_id, ContextInterface $ctx = null){
+        if(is_null($ctx))
+            $ctx = $this->getCtx();
+
+        if(!($_id instanceof \MongoId)){
+            $_id = new \MongoId($_id);
+        }
+
+        $this->collection->remove(array("_id"=> $_id));
+
+        // delete in node
+        NodeService::instance()->delete($_id);
+
+        return array("success"=> true);
     }
 
     public function getItemPictures($id, ContextInterface $ctx = null){

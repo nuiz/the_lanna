@@ -11,6 +11,7 @@ namespace Main\Service;
 
 use Main\Context\ContextInterface;
 use Main\DB;
+use Main\Helper\ArrayHelper;
 use Main\Helper\URL;
 
 class NodeService extends BaseService {
@@ -30,18 +31,26 @@ class NodeService extends BaseService {
         $this->collection = $this->db->nodes;
     }
 
-    public function addOrEdit($entity, $type){
+    public function addOrEdit($entity, $type, ContextInterface $ctx = null){
         $_id = $entity['_id'];
-        if(!($_id instanceof \MongoDate)){
+        if(!($_id instanceof \MongoId)){
             $_id = new \MongoId($_id);
         }
 
         $entity['type'] = $type;
         unset($entity['_id']);
+        $entity = ArrayHelper::ArrayGetPath($entity);
         $this->collection->update(
             array('_id'=> $_id),
             array('$set'=> $entity),
             array('upsert'=> true));
+    }
+
+    public function delete($_id){
+        if(!($_id instanceof \MongoDate)){
+            $_id = new \MongoId($_id);
+        }
+        $this->collection->remove(array('_id'=> $_id));
     }
 
     public function gets($options = array(), ContextInterface $ctx = null){
@@ -79,10 +88,23 @@ class NodeService extends BaseService {
             $thumbModel = \Main\Helper\Image::instance()->findByRef($item['thumb']);
             $item['thumb'] = $thumbModel->toArrayResponse();
 
+            // children length
+            $item['children_length'] = $this->getChildrenLength($item['_id']);
+
             $item['id'] = $item['_id']->{'$id'};
             unset($item['_id'], $item['parent']);
 
             $item['node'] = $this->makeNode($item);
+
+            if(!$ctx->isAdminConsumer()){
+                $item['name'] = $item['name'][$ctx->getLang()];
+                if(isset($item['detail'])){
+                    $item['detail'] = $item['detail'][$ctx->getLang()];
+                }
+            }
+            if(isset($item['pictures'])){
+                unset($item['pictures']);
+            }
 
             $data[] = $item;
         }
@@ -110,5 +132,13 @@ class NodeService extends BaseService {
             );
         }
         return $node;
+    }
+
+    public function getChildrenLength($_id){
+        if(!($_id instanceof \MongoDate)){
+            $_id = new \MongoId($_id);
+        }
+
+        return $this->collection->find(array('parent'=> \MongoDBRef::create("folders", $_id)))->count();
     }
 }

@@ -15,6 +15,14 @@ use Main\Service\FolderService;
  */
 class FolderCTL extends BaseCTL {
     /**
+     * @POST
+     */
+    public function add(){
+        $item = FolderService::instance()->add($this->reqInfo->params(), $this->getCtx());
+        return $item;
+    }
+
+    /**
      * @PUT
      * @uri /[h:id]
      */
@@ -22,4 +30,22 @@ class FolderCTL extends BaseCTL {
         $item = FolderService::instance()->edit($this->reqInfo->urlParam("id"), $this->reqInfo->params(), $this->getCtx());
         return $item;
     }
-} 
+
+    /**
+     * @GET
+     * @uri /[h:id]
+     */
+    public function get(){
+        $item = FolderService::instance()->get($this->reqInfo->urlParam("id"), $this->getCtx());
+        return $item;
+    }
+
+    /**
+     * @DELETE
+     * @uri /[h:id]
+     */
+    public function delete(){
+        FolderService::instance()->delete($this->reqInfo->urlParam("id"));
+        return array("success"=> true);
+    }
+}

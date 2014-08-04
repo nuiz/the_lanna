@@ -19,7 +19,7 @@ class NodeCTL extends BaseCTL {
      * @GET
      */
     public function index(){
-        $items = NodeService::instance()->gets();
+        $items = NodeService::instance()->gets(array(), $this->getCtx());
         return $items;
     }
 
@@ -29,7 +29,7 @@ class NodeCTL extends BaseCTL {
      */
     public function children(){
         $params = array('parent_id'=> $this->reqInfo->urlParam('id'));
-        $items = NodeService::instance()->gets(array('params'=> $params));
+        $items = NodeService::instance()->gets(array('params'=> $params), $this->getCtx());
         return $items;
     }
 }

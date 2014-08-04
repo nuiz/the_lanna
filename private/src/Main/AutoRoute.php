@@ -35,7 +35,7 @@ class AutoRoute {
     public static function mapAllCTL(){
         $router = new \AltoRouter();
 
-        $router->setBasePath('/de_lanna');
+        //$router->setBasePath('/de_lanna');
         $ctls = self::readCTL();
         foreach($ctls as $ctl){
             $router->map(implode('|', $ctl['methods']), $ctl['uri'], array(
