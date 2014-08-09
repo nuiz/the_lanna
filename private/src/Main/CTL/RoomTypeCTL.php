@@ -58,6 +58,15 @@ class RoomTypeCTL extends BaseCTL {
     }
 
     /**
+     * @POST
+     * @uri /sort
+     */
+    public function sort(){
+        $res = RoomTypeService::instance()->sort($this->reqInfo->params(), $this->getCtx());
+        return $res;
+    }
+
+    /**
      * @GET
      * @uri /[h:id]/pictures
      */

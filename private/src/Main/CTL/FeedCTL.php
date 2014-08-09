@@ -61,6 +61,16 @@ class FeedCTL extends BaseCTL {
     }
 
     /**
+     * @POST
+     * @uri /sort
+     */
+    public function sort(){
+        $res = FeedService::instance()->sort($this->reqInfo->params(), $this->getCtx());
+        return $res;
+    }
+
+
+    /**
      * @GET
      * @uri /gallery
      */

@@ -87,7 +87,8 @@ class RoomTypeService extends BaseService {
         $cursor = $this->collection
             ->find($condition, $select)
             ->limit($default['limit'])
-            ->skip($skip);
+            ->skip($skip)
+            ->sort(array('seq'=> -1));
 
         $total = $this->collection->count($condition);
         $length = $cursor->count();
@@ -138,6 +139,15 @@ class RoomTypeService extends BaseService {
                 'limit'=> $options['limit']
             )
         );
+    }
+
+    public function sort($param, ContextInterface $ctx = null){
+        foreach($param['id'] as $key=> $id){
+            $mongoId = new \MongoId($id);
+            $seq = $key+$param['offset'];
+            $this->collection->update(array('_id'=> $mongoId), array('$set'=> array('seq'=> $seq)));
+        }
+        return array('success'=> true);
     }
 
     public function getItemPictures($id, ContextInterface $ctx = null){

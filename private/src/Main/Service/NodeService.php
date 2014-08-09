@@ -133,6 +133,15 @@ class NodeService extends BaseService {
         );
     }
 
+    public function sort($param, ContextInterface $ctx = null){
+        foreach($param['id'] as $key=> $id){
+            $mongoId = new \MongoId($id);
+            $seq = $key+$param['offset'];
+            $this->collection->update(array('_id'=> $mongoId), array('$set'=> array('seq'=> $seq)));
+        }
+        return array('success'=> true);
+    }
+
     private function makeNode($item){
         if($item['type']=='service_room' || $item['type']=='service_food'){
             $node = array(

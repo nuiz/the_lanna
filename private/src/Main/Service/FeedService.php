@@ -135,9 +135,9 @@ class FeedService extends BaseService {
 
         $cursor = $this->collection
             ->find($condition)
-            ->sort(array('_id'=> 1))
             ->limit($options['limit'])
-            ->skip($skip);
+            ->skip($skip)
+            ->sort(array('seq'=> -1));
 
         $total = $this->collection->count($condition);
         $length = $cursor->count(true);
@@ -169,6 +169,15 @@ class FeedService extends BaseService {
                 'limit'=> (int)$options['limit']
             )
         );
+    }
+
+    public function sort($param, ContextInterface $ctx = null){
+        foreach($param['id'] as $key=> $id){
+            $mongoId = new \MongoId($id);
+            $seq = $key+$param['offset'];
+            $this->collection->update(array('_id'=> $mongoId), array('$set'=> array('seq'=> $seq)));
+        }
+        return array('success'=> true);
     }
 
     public function delete($id, ContextInterface $ctx = null){

@@ -35,4 +35,13 @@ class NodeCTL extends BaseCTL {
         $items = NodeService::instance()->gets($options, $this->getCtx());
         return $items;
     }
+
+    /**
+     * @POST
+     * @uri /sort
+     */
+    public function sort(){
+        $res = NodeService::instance()->sort($this->reqInfo->params(), $this->getCtx());
+        return $res;
+    }
 }

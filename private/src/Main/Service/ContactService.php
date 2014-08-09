@@ -12,6 +12,7 @@ namespace Main\Service;
 use Main\Context\Context;
 use Main\Context\ContextInterface;
 use Main\DB;
+use Main\Helper\Image;
 
 class ContactService extends BaseService {
     private $collection;
@@ -39,6 +40,10 @@ class ContactService extends BaseService {
         if(is_null($entity)){
             $entity = $this->insertWhenEmpty($ctx);
         }
+        if(!is_null($entity['picture'])){
+            $pic = Image::instance()->findByRef($entity['picture']);
+            $entity['picture'] = $pic->toArrayResponse();
+        }
 
         return $entity;
     }
@@ -58,6 +63,11 @@ class ContactService extends BaseService {
             return $entity;
         }
 
+        if(isset($param['picture'])){
+            $pic = Image::instance()->add($param['picture']);
+            $set['picture'] = $pic->getDBRef();
+        }
+
         $this->collection->update(array("_id"=> $entity['_id']), array('$set'=> $set));
 
         return $this->collection->findOne();
@@ -70,7 +80,8 @@ class ContactService extends BaseService {
         $entity = array(
             "phone"=> "088-888-8888",
             "website"=> "http://www.example.com",
-            "email"=> "example@example.com"
+            "email"=> "example@example.com",
+            "picture"=> null
         );
 
         $this->collection->insert($entity);
