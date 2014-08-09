@@ -47,6 +47,7 @@ class ServiceService extends BaseService {
         return $entity;
     }
 
+    /*
     public function addFood(array $params, ContextInterface $ctx = null){
         $entity = $params;
         $thumb = Image::instance()->add($params['thumb']);
@@ -55,6 +56,7 @@ class ServiceService extends BaseService {
         $entity['parent'] = null;
         if(!empty($params['parent_id'])){
             $parent = FolderService::instance()->get($params['parent_id']);
+            $parent['_id'] = new \MongoId($params['_id']);
             $parentRef = \MongoDBRef::create("folders", $parent['_id']);
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
@@ -76,14 +78,52 @@ class ServiceService extends BaseService {
         $entity['parent'] = null;
         if(!empty($params['parent_id'])){
             $parent = FolderService::instance()->get($params['parent_id']);
+            $parent['_id'] = new \MongoId($params['_id']);
             $parentRef = \MongoDBRef::create("folders", $parent['_id']);
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
         }
+        $entity['type'] = 'service_room';
         $this->collection->insert($entity);
 
         // Node service update
         NodeService::instance()->addOrEdit($entity, 'service_room');
+
+        return $this->get($entity['_id']);
+    }
+    */
+
+    public function add(array $params, ContextInterface $ctx = null){
+        $entity = $params;
+        $thumb = Image::instance()->add($params['thumb']);
+        $entity['thumb'] = $thumb->getDBRef();
+
+        $entity['parent'] = null;
+        if(isset($params['parent_id'])){
+            if($params['parent_id'] === 0 || $params['parent_id'] === null){
+                $parentRef = null;
+            }
+            else {
+                $parent = $this->get($params['parent_id']);
+                if(is_null($parent)){
+                    return ResponseHelper::notFound("Not found parent");
+                }
+
+                $parent['_id'] = new \MongoId($params['parent_id']);
+                $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            }
+            if(!isset($set['price']) || $set['price'] == 0 || $set['price'] == ''){
+                $set['price'] = null;
+            }
+
+            $entity['parent'] = $parentRef;
+            unset($entity['parent_id']);
+        }
+        $entity['type'] = !isset($entity['price']) || trim($entity['price'])=='' || $entity['price']=='0'? 'service_room': 'service_food';
+        $this->collection->insert($entity);
+
+        // Node service update
+        NodeService::instance()->addOrEdit($entity, $entity['type']);
 
         return $this->get($entity['_id']);
     }
@@ -99,12 +139,18 @@ class ServiceService extends BaseService {
         $entity = $params;
 
         if(isset($params['parent_id'])){
-            $parent = $this->get($params['parent_id']);
-            if(is_null($parent)){
-                throw new \Exception("Not found parent_id ".$params['parent_id']);
+            if($params['parent_id'] === 0 || $params['parent_id'] === null){
+                $parentRef = null;
             }
-            $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            else {
+                $parent = $this->get($params['parent_id']);
+                if(is_null($parent)){
+                    return ResponseHelper::notFound("Not found parent");
+                }
 
+                $parent['_id'] = new \MongoId($params['parent_id']);
+                $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            }
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
         }
@@ -113,18 +159,24 @@ class ServiceService extends BaseService {
             $entity['thumb'] = $thumb->getDBRef();
         }
 
+        if(isset($set['price']) &&($set['price'] == 0 || $set['price'] == '')){
+            $set['price'] = null;
+        }
+
         // unset pictures for protected edit pictures
         unset($entity["pictures"]);
+        $entity['type'] = !isset($entity['price']) || trim($entity['price'])=='' || $entity['price']=='0'? 'service_room': 'service_food';
 
         $entity = ArrayHelper::ArrayGetPath($entity);
 
         $this->collection->update(array('_id'=> $_id), array('$set'=> $entity));
 
-        $entity = $this->db->folders->findOne(array('id'=> $_id));
+        $entity = $this->collection->findOne(array('_id'=> $_id));
         $entity['_id'] = $_id;
         unset($entity['id']);
+
         // Node service update
-        NodeService::instance()->addOrEdit($entity, 'folder', $ctx);
+        NodeService::instance()->addOrEdit($entity, $entity['type'], $ctx);
 
         return $this->get($_id);
     }
@@ -192,6 +244,20 @@ class ServiceService extends BaseService {
                 '$push'=> array('pictures'=> $picDBRef)
             ));
             $data[] = $picModel->toArrayResponse();
+        }
+        return $data;
+    }
+
+    public function deletePictures($id, $params, ContextInterface $ctx = null){
+        if(!($id instanceof \MongoId)){ $id = new \MongoId($id); }
+
+        $data = array();
+        foreach($params['id'] as $picId){
+            $picDBRef = \MongoDBRef::create("pictures", new \MongoId($picId));
+            $this->collection->update(array("_id"=> $id), array(
+                '$pull'=> array('pictures'=> $picDBRef)
+            ));
+            $data[] = $picId;
         }
         return $data;
     }

@@ -54,12 +54,23 @@ class FolderService extends BaseService {
         $entity['thumb'] = $thumb->getDBRef();
 
         $entity['parent'] = null;
-        if(!empty($params['parent_id'])){
-            $parent = $this->get($params['parent_id']);
-            $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+        if(isset($params['parent_id'])){
+            if($params['parent_id'] === 0 || $params['parent_id'] === null){
+                $parentRef = null;
+            }
+            else {
+                $parent = $this->get($params['parent_id']);
+                if(is_null($parent)){
+                    return ResponseHelper::notFound("Not found parent");
+                }
+
+                $parent['_id'] = new \MongoId($params['parent_id']);
+                $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            }
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
         }
+        $entity['type'] = 'folder';
         $this->collection->insert($entity);
 
         // Node service update
@@ -79,12 +90,18 @@ class FolderService extends BaseService {
         $entity = $params;
 
         if(isset($params['parent_id'])){
-            $parent = $this->get($params['parent_id']);
-            if(is_null($parent)){
-                throw new \Exception("Not found parent_id ".$params['parent_id']);
+            if($params['parent_id'] === 0 || $params['parent_id'] === null){
+                $parentRef = null;
             }
-            $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            else {
+                $parent = $this->get($params['parent_id']);
+                if(is_null($parent)){
+                    return ResponseHelper::notFound("Not found parent");
+                }
 
+                $parent['_id'] = new \MongoId($params['parent_id']);
+                $parentRef = \MongoDBRef::create("folders", $parent['_id']);
+            }
             $entity['parent'] = $parentRef;
             unset($entity['parent_id']);
         }

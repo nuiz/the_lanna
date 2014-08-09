@@ -41,6 +41,9 @@ class FeedGalleryService extends BaseService {
             $pictures[] = $imgModel->toArrayResponse();
         }
 
+        // feed gallery update timestamp (last_update)
+        TimeService::instance()->update('feed_gallery');
+
         return $pictures;
     }
 
@@ -126,6 +129,10 @@ class FeedGalleryService extends BaseService {
             ));
             $data[] = $picId;
         }
+
+        // feed gallery update timestamp (last_update)
+        TimeService::instance()->update('feed_gallery');
+
         return $data;
     }
 

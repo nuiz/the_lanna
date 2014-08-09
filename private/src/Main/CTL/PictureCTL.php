@@ -29,7 +29,7 @@ class PictureCTL extends BaseCTL {
 
         header('Content-Type: image/jpeg');
         header('Ram: '.memory_get_usage(true));
-        imagejpeg($img);
+        imagejpeg($img, null, 100);
         exit();
     }
 
@@ -80,7 +80,8 @@ class PictureCTL extends BaseCTL {
         //exit();
 
         $newImg = imagecreatetruecolor($width, $height);
-        imagecopyresized($newImg, $img, 0, 0, $src_x, $src_y, $width, $height, $grab_width, $grab_height);
+        //imagecopyresized($newImg, $img, 0, 0, $src_x, $src_y, $width, $height, $grab_width, $grab_height);
+        imagecopyresampled($newImg, $img, 0, 0, $src_x, $src_y, $width, $height, $grab_width, $grab_height);
 
         return $newImg;
     }

@@ -16,19 +16,9 @@ use Main\Service\ServiceService;
 class ServiceCTL extends BaseCTL {
     /**
      * @POST
-     * @uri /food
      */
-    public function addFood(){
-        $item = ServiceService::instance()->addFood($this->reqInfo->params(), $this->getCtx());
-        return $item;
-    }
-
-    /**
-     * @POST
-     * @uri /room
-     */
-    public function addRoom(){
-        $item = ServiceService::instance()->addRoom($this->reqInfo->params(), $this->getCtx());
+    public function add(){
+        $item = ServiceService::instance()->add($this->reqInfo->params(), $this->getCtx());
         return $item;
     }
 
@@ -73,7 +63,16 @@ class ServiceCTL extends BaseCTL {
      * @uri /[h:id]/pictures
      */
     public function addPictures(){
-        $items = ServiceService::instance()->addPictures($this->reqInfo->urlParam('id'));
+        $items = ServiceService::instance()->addPictures($this->reqInfo->urlParam('id'), $this->reqInfo->param('pictures'));
+        return $items;
+    }
+
+    /**
+     * @DELETE
+     * @uri /[h:id]/pictures
+     */
+    public function deleteItemPictures(){
+        $items = ServiceService::instance()->deletePictures($this->reqInfo->urlParam('id'), $this->reqInfo->params());
         return $items;
     }
 }

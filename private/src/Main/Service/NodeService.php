@@ -37,6 +37,18 @@ class NodeService extends BaseService {
             $_id = new \MongoId($_id);
         }
 
+        $seq = 1;
+        $old = $this->collection->findOne(array('_id'=> $_id));
+        if(is_null($old)){
+            $parentField = $entity['parent'];
+            $maxCursor = $this->collection->find(array('parent'=> $parentField))->sort(array("seq"=> -1))->limit(1);
+            if($maxCursor->count(true) > 0){
+                $maxEntity = $maxCursor->getNext();
+                $seq = $maxEntity['seq']+1;
+            }
+        }
+
+        $entity['seq'] = $seq;
         $entity['type'] = $type;
         unset($entity['_id']);
         $entity = ArrayHelper::ArrayGetPath($entity);
@@ -63,7 +75,7 @@ class NodeService extends BaseService {
         );
         $options = array_merge($default, $options);
 
-        $skip = ($default['page']-1)*$default['limit'];
+        $skip = ($options['page']-1)*$options['limit'];
         //$select = array("name", "detail", "feature", "price", "pictures");
         $condition = array('parent'=> null);
 
@@ -77,11 +89,12 @@ class NodeService extends BaseService {
 
         $cursor = $this->collection
             ->find($condition)
-            ->limit($default['limit'])
-            ->skip($skip);
+            ->limit((int)$options['limit'])
+            ->skip((int)$skip)
+            ->sort(array('seq'=> -1));
 
         $total = $this->collection->count($condition);
-        $length = $cursor->count();
+        $length = $cursor->count(true);
 
         $data = array();
         foreach($cursor as $item){
@@ -114,8 +127,8 @@ class NodeService extends BaseService {
             'total'=> $total,
             'data'=> $data,
             'paging'=> array(
-                'page'=> $options['page'],
-                'limit'=> $options['limit']
+                'page'=> (int)$options['page'],
+                'limit'=> (int)$options['limit']
             )
         );
     }

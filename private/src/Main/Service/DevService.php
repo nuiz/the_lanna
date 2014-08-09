@@ -10,6 +10,7 @@ namespace Main\Service;
 
 
 use Main\DB;
+use Main\Helper\ArrayHelper;
 
 class DevService extends BaseService {
     /** @return self */
@@ -35,6 +36,7 @@ class DevService extends BaseService {
             $set = $value;
             unset($set['_id']);
             $set['type'] = "folder";
+            $set = ArrayHelper::ArrayGetPath($set);
             $nodeC->update(array('_id'=> $value['_id']), array('$set'=> $set), array('upsert'=> 1));
         }
 
@@ -42,12 +44,13 @@ class DevService extends BaseService {
         foreach($services as $key => $value){
             $set = $value;
             unset($set['_id']);
-            if(isset($set['price'])){
+            if(isset($set['price']) && !empty($set['price'])){
                 $set['type'] = "service_food";
             }
             else {
                 $set['type'] = "service_room";
             }
+            $set = ArrayHelper::ArrayGetPath($set);
             $nodeC->update(array('_id'=> $value['_id']), array('$set'=> $set), array('upsert'=> 1));
         }
     }

@@ -11,7 +11,7 @@ namespace Main\Helper;
 
 class URL {
     public static function absolute($url){
-        return "http://110.164.70.62/de_lanna".$url;
+        return "http://delanna-api.pla2app.com".$url;
     }
 
     public static function share($url){

@@ -43,6 +43,9 @@ class FeedService extends BaseService {
         // insert
         $this->collection->insert($entity);
 
+        // feed update timestamp (last_update)
+        TimeService::instance()->update('feed');
+
         return $this->get($entity['_id'], $ctx);
     }
 
@@ -79,6 +82,10 @@ class FeedService extends BaseService {
 
         // insert
         $this->collection->update(array('_id'=> $id), array('$set'=> $entity));
+
+
+        // feed update timestamp (last_update)
+        TimeService::instance()->update('feed');
 
         return $this->get($id, $ctx);
     }
@@ -122,18 +129,18 @@ class FeedService extends BaseService {
         );
         $options = array_merge($default, $options);
 
-        $skip = ($default['page']-1)*$default['limit'];
+        $skip = ($options['page']-1)*$options['limit'];
         //$select = array("name", "detail", "feature", "price", "pictures");
         $condition = array();
 
         $cursor = $this->collection
             ->find($condition)
             ->sort(array('_id'=> 1))
-            ->limit($default['limit'])
+            ->limit($options['limit'])
             ->skip($skip);
 
         $total = $this->collection->count($condition);
-        $length = $cursor->count();
+        $length = $cursor->count(true);
 
         $data = array();
         foreach($cursor as $item){
@@ -158,8 +165,8 @@ class FeedService extends BaseService {
             'total'=> $total,
             'data'=> $data,
             'paging'=> array(
-                'page'=> $options['page'],
-                'limit'=> $options['limit']
+                'page'=> (int)$options['page'],
+                'limit'=> (int)$options['limit']
             )
         );
     }
@@ -173,6 +180,10 @@ class FeedService extends BaseService {
         }
 
         $this->collection->remove(array("_id"=> $id));
+
+        // feed update timestamp (last_update)
+        TimeService::instance()->update('feed');
+
         return array("success"=> true);
     }
 

@@ -21,7 +21,7 @@ class FeedCTL extends BaseCTL {
      * @GET
      */
     public function gets(){
-        $items = FeedService::instance()->gets(array(), $this->getCtx());
+        $items = FeedService::instance()->gets($this->reqInfo->params(), $this->getCtx());
         return $items;
     }
 
