@@ -17,4 +17,12 @@ class ResponseHelper {
             'type'=> 'NotFound'
         );
     }
+
+    public static function error($message, $code = 500, $type = 'Error'){
+        return array(
+            'code'=> $code,
+            'message'=> $message,
+            'type'=> $type
+        );
+    }
 } 

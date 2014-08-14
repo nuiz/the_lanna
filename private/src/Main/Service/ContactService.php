@@ -57,7 +57,7 @@ class ContactService extends BaseService {
             $entity = $this->insertWhenEmpty($ctx);
         }
 
-        $set = array("phone"=> "", "website"=> "", "email"=> "");
+        $set = array("phone"=> "", "website"=> "", "email"=> "", "picture"=> "");
         $set = array_intersect_key($param, $set);
         if(count($set)==0){
             return $entity;
@@ -70,7 +70,7 @@ class ContactService extends BaseService {
 
         $this->collection->update(array("_id"=> $entity['_id']), array('$set'=> $set));
 
-        return $this->collection->findOne();
+        return $this->get($ctx);
     }
 
     private function insertWhenEmpty(ContextInterface $ctx = null){
