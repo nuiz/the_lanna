@@ -11,6 +11,7 @@
     ],
     "require": {
         "dannykopping/docblock": "dev-master",
-        "altorouter/altorouter": "v1.1.0"
+        "altorouter/altorouter": "v1.1.0",
+        "jwage/php-apns": "dev-master"
     }
 }

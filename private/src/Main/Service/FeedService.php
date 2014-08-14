@@ -40,6 +40,14 @@ class FeedService extends BaseService {
         $imgModel = Image::instance()->add($params['thumb']);
         $entity['thumb'] = $imgModel->getDBRef();
 
+        $seq = 1;
+        $maxCursor = $this->collection->find()->sort(array("seq"=> -1))->limit(1);
+        if($maxCursor->count(true) > 0){
+            $maxEntity = $maxCursor->getNext();
+            $seq = $maxEntity['seq']+1;
+        }
+        $entity['seq'] = $seq;
+
         // insert
         $this->collection->insert($entity);
 

@@ -5,6 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/altorouter/altorouter" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/dannykopping/docblock" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/jwage/php-apns" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -24,11 +25,13 @@
       <library name="PHP">
         <CLASSES>
           <root url="file://$MODULE_DIR$/vendor/dannykopping/docblock" />
+          <root url="file://$MODULE_DIR$/vendor/jwage/php-apns" />
           <root url="file://$MODULE_DIR$/vendor/altorouter/altorouter" />
           <root url="file://$MODULE_DIR$/vendor/composer" />
         </CLASSES>
         <SOURCES>
           <root url="file://$MODULE_DIR$/vendor/dannykopping/docblock" />
+          <root url="file://$MODULE_DIR$/vendor/jwage/php-apns" />
           <root url="file://$MODULE_DIR$/vendor/altorouter/altorouter" />
           <root url="file://$MODULE_DIR$/vendor/composer" />
         </SOURCES>
