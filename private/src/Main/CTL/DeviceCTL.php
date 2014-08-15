@@ -16,21 +16,14 @@ use Main\Service\DeviceService;
 class DeviceCTL extends BaseCTL {
     /**
      * @GET
-     * @uri /has
      */
-    public function has(){
-        return DeviceService::instance()->has($this->reqInfo->inputs());
+    public function get(){
+        return DeviceService::instance()->get($this->reqInfo->inputs());
     }
     /**
-     * @POST
+     * @PUT
      */
-    public function add(){
-        return DeviceService::instance()->add($this->reqInfo->inputs());
-    }
-    /**
-     * @DELETE
-     */
-    public function delete(){
-        return DeviceService::instance()->delete($this->reqInfo->inputs());
+    public function edit(){
+        return DeviceService::instance()->edit($this->reqInfo->inputs());
     }
 }
