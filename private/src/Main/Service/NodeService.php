@@ -98,9 +98,6 @@ class NodeService extends BaseService {
 
         $data = array();
         foreach($cursor as $item){
-            $thumbModel = \Main\Helper\Image::instance()->findByRef($item['thumb']);
-            $item['thumb'] = $thumbModel->toArrayResponse();
-
             // children length
             $item['children_length'] = $this->getChildrenLength($item['_id']);
 
@@ -114,6 +111,14 @@ class NodeService extends BaseService {
                 if(isset($item['detail'])){
                     $item['detail'] = $item['detail'][$ctx->getLang()];
                 }
+            }
+            if($item['type']=='folder'){
+                $thumbModel = \Main\Helper\Image::instance()->findByRef($item['thumb']);
+                $item['thumb'] = $thumbModel->toArrayResponse();
+            }
+            else {
+                $thumbModel = \Main\Helper\Image::instance()->findByRef($item['pictures'][0]);
+                $item['thumb'] = $thumbModel->toArrayResponse();
             }
             if(isset($item['pictures'])){
                 unset($item['pictures']);

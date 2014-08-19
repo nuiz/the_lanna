@@ -86,8 +86,8 @@ class DeviceService extends BaseService {
     */
 
     public function edit($params, ContextInterface $ctx = null){
-        $allowed = array('type', 'key', 'admit');
-        $params = array_intersect_key($params, array_flip($allowed));
+        $allowed = array('type', 'key');
+        $condition = array_intersect_key($params, array_flip($allowed));
 
         if(!isset($params['type'])){
             return ResponseHelper::error('Require parameter type');
@@ -95,14 +95,20 @@ class DeviceService extends BaseService {
         if(!isset($params['key'])){
             return ResponseHelper::error('Require parameter key');
         }
-        if(!isset($params['admit'])){
-            return ResponseHelper::error('Require parameter admit');
+
+        // get entity for create if empty
+        $entity = $this->get($params, $ctx);
+
+        $allowed = array('admit', 'lang');
+        $set = array_intersect_key($params, array_flip($allowed));
+        if(isset($set['admit'])){
+            $set['admit'] = (bool)$set['admit'];
+        }
+        if(isset($set['lang'])){
+            $set['lang'] = strtolower($set['lang']);
         }
 
-        $entity = $this->get($params, $ctx);
-        $condition = $params;
-        unset($condition['admit']);
-        $this->collection->update($condition, array('$set'=>array('admit'=> (bool)$params['admit'])));
+        $this->collection->update($condition, array('$set'=> $set));
 
         $entity = $this->get($params);
         return $entity;
@@ -111,10 +117,29 @@ class DeviceService extends BaseService {
     public function get($params, ContextInterface $ctx = null){
         $allowed = array('type', 'key');
         $condition = array_intersect_key($params, array_flip($allowed));
+        if(!isset($params['type'])){
+            return ResponseHelper::error('Require parameter type');
+        }
+        if(!isset($params['key'])){
+            return ResponseHelper::error('Require parameter key');
+        }
+
         $entity = $this->collection->findOne($condition);
         if(is_null($entity)){
-            $entity = $params;
-            $entity['admit'] = true;
+            $allowed = array('admit', 'lang', 'type', 'key');
+            $entity = array_intersect_key($params, array_flip($allowed));
+            if(isset($set['admit'])){
+                $set['admit'] = (bool)$set['admit'];
+            }
+
+            if(!isset($entity['admit'])){
+                $entity['admit'] = true;
+            }
+            $entity['admit'] = (bool)$entity['admit'];
+            if(!isset($params['lang'])){
+                $entity['lang'] = 'en';
+            }
+            $entity['lang'] = strtolower($entity['lang']);
             $this->collection->insert($entity);
         }
         return $entity;

@@ -38,7 +38,24 @@ class ServiceService extends BaseService {
         if(is_null($entity)){
             return ResponseHelper::notFound("Room type not found");
         }
-        $entity['thumb'] = Image::instance()->findByRef($entity['thumb'])->toArrayResponse();
+
+        // language
+        if($ctx->isAdminConsumer()){
+            $entity['name'] = $entity['name'][$ctx->getLang()];
+            $entity['detail'] = $entity['detail'][$ctx->getLang()];
+            $entity['feature'] = $entity['feature'][$ctx->getLang()];
+        }
+
+        $picsRef = $entity['pictures'];
+        //$item['pictures'] = array();
+        unset($entity['pictures']);
+        foreach($picsRef as $key=> $picRef){
+            $img = \Main\Helper\Image::instance()->findByRef($picRef);
+            $item['pictures'][] = $img->toArrayResponse();
+            if($key==0){
+                $item['thumb'] = $img->toArrayResponse();
+            }
+        }
 
         // id
         $entity['id'] = $entity['_id']->{'$id'};
@@ -95,8 +112,8 @@ class ServiceService extends BaseService {
 
     public function add(array $params, ContextInterface $ctx = null){
         $entity = $params;
-        $thumb = Image::instance()->add($params['thumb']);
-        $entity['thumb'] = $thumb->getDBRef();
+//        $thumb = Image::instance()->add($params['thumb']);
+//        $entity['thumb'] = $thumb->getDBRef();
 
         $entity['parent'] = null;
         if(isset($params['parent_id'])){

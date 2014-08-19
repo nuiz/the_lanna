@@ -12,6 +12,7 @@ namespace Main\Service;
 use Main\Context\ContextInterface;
 use Main\DB;
 use Main\Helper\Image;
+use Main\Helper\NotifyHelper;
 use Main\Helper\ResponseHelper;
 use Main\Helper\URL;
 
@@ -53,6 +54,9 @@ class FeedService extends BaseService {
 
         // feed update timestamp (last_update)
         TimeService::instance()->update('feed');
+
+        // add to notifycation
+        NotifyHelper::sendAll($entity['_id'], $entity['name'], $entity['detail']);
 
         return $this->get($entity['_id'], $ctx);
     }

@@ -18,7 +18,7 @@ class RoomTypeCTL extends BaseCTL {
      * @GET
      */
     public function gets(){
-        $items = RoomTypeService::instance()->gets(array(), $this->getCtx());
+        $items = RoomTypeService::instance()->gets($this->reqInfo->params(), $this->getCtx());
         return $items;
     }
 

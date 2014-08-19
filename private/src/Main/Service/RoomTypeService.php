@@ -37,7 +37,7 @@ class RoomTypeService extends BaseService {
         if(is_null($ctx))
             $ctx = $this->getCtx();
 
-        $select = array("name", "detail", "feature", "price", "pictures", "thumb");
+        $select = array("name", "detail", "feature", "price", "pictures");
 
         if(!($id instanceof \MongoId)){ $id = new \MongoId($id); }
 
@@ -60,8 +60,12 @@ class RoomTypeService extends BaseService {
         foreach($picsRef as $key=> $picRef){
             $img = \Main\Helper\Image::instance()->findByRef($picRef);
             $item['pictures'][] = $img->toArrayResponse();
+            if($key==0){
+                $item['thumb'] = $img->toArrayResponse();
+            }
         }
-        $item['thumb'] = \Main\Helper\Image::instance()->findByRef($item['thumb'])->toArrayResponse();
+        //$item['thumb'] = \Main\Helper\Image::instance()->findByRef($item['thumb'])->toArrayResponse();
+        //$item['thumb'] = \Main\Helper\Image::instance()->findByRef($item['thumb'])->toArrayResponse();
 
         $item['id'] = $item['_id']->{'$id'};
         unset($item['_id']);
@@ -81,8 +85,8 @@ class RoomTypeService extends BaseService {
         );
         $options = array_merge($default, $options);
 
-        $skip = ($default['page']-1)*$default['limit'];
-        $select = array("name", "detail", "feature", "price", "pictures", "thumb");
+        $skip = ($options['page']-1)*$options['limit'];
+        $select = array("name", "detail", "feature", "price", "pictures");
         $condition = array();
         $cursor = $this->collection
             ->find($condition, $select)
@@ -91,7 +95,7 @@ class RoomTypeService extends BaseService {
             ->sort(array('seq'=> -1));
 
         $total = $this->collection->count($condition);
-        $length = $cursor->count();
+        $length = $cursor->count(true);
 
         $data = array();
         foreach($cursor as $item){
@@ -116,12 +120,15 @@ class RoomTypeService extends BaseService {
             foreach($picsRef as $key=> $picRef){
                 $img = \Main\Helper\Image::instance()->findByRef($picRef);
                 $item['pictures'][] = $img->toArrayResponse();
+                if($key==0){
+                    $item['thumb'] = $img->toArrayResponse();
+                }
             }
 
             //$item['thumb'] = $item['pictures'][0];
             //$item['thumb'] = $item['pictures'][0];
 
-            $item['thumb'] = \Main\Helper\Image::instance()->findByRef($item['thumb'])->toArrayResponse();
+            //$item['thumb'] = \Main\Helper\Image::instance()->findByRef($item['thumb'])->toArrayResponse();
 
             $item['id'] = $item['_id']->{'$id'};
             unset($item['_id']);
@@ -135,8 +142,8 @@ class RoomTypeService extends BaseService {
             'total'=> $total,
             'data'=> $data,
             'paging'=> array(
-                'page'=> $options['page'],
-                'limit'=> $options['limit']
+                'page'=> (int)$options['page'],
+                'limit'=> (int)$options['limit']
             )
         );
     }
@@ -188,8 +195,10 @@ class RoomTypeService extends BaseService {
         }
         $params['pictures'] = array();
 
+        /*
         $thumbModel = \Main\Helper\Image::instance()->add($params['thumb']);
         $params['thumb'] = $thumbModel->getDBRef();
+        */
 
         $seq = 1;
         $maxCursor = $this->collection->find()->sort(array("seq"=> -1))->limit(1);
@@ -203,7 +212,7 @@ class RoomTypeService extends BaseService {
 
         foreach($pictures as $picture){
             $picture = \Main\Helper\Image::instance()->add($picture);
-            $picDBRef = \MongoDBRef::create("pictures", $picture->getMongoId());
+            $picDBRef = $picture->getDBRef();
             $this->collection->update(array("_id"=> $params['_id']), array(
                 '$push'=> array('pictures'=> $picDBRef)
             ));
@@ -223,10 +232,13 @@ class RoomTypeService extends BaseService {
         }
         $set = ArrayHelper::ArrayGetPath($set);
 
+        /*
         if(isset($set['thumb'])){
             $thumbModel = \Main\Helper\Image::instance()->add($set['thumb']);
             $set['thumb'] = $thumbModel->getDBRef();
         }
+        */
+
         //$id = $params['id'];
         if(!($id instanceof \MongoId)){ $id = new \MongoId($id); }
         $this->collection->update(array('_id'=> $id), array('$set'=> $set));

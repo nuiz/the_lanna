@@ -16,6 +16,7 @@ use Main\Service\DeviceService;
 class DeviceCTL extends BaseCTL {
     /**
      * @GET
+     * @POST
      */
     public function get(){
         return DeviceService::instance()->get($this->reqInfo->inputs());

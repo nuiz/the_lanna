@@ -13,7 +13,7 @@ class GCMHerlper {
     // setting api key
     protected static $apiKey = "AIzaSyBkuZZfkpE8p4IC9fIYuo3drCQdmBpqdZ8";
 
-    public static function send($tokens, $title, $message){
+    public static function send($tokens, $message){
 
         $registatoin_ids = $tokens;
 
@@ -53,6 +53,5 @@ class GCMHerlper {
 
         // Close connection
         curl_close($ch);
-        echo $result;
     }
-} 
+}
