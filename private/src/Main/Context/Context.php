@@ -19,7 +19,7 @@ class Context implements ContextInterface {
 
     public function setLang($lang)
     {
-        return $this->lang = $lang;
+        return $this->lang = strtolower($lang);
     }
 
     public function getDefaultLang()
@@ -37,7 +37,7 @@ class Context implements ContextInterface {
      */
     public function setConsumerType($consumer_type)
     {
-        $this->consumer_type = $consumer_type;
+        $this->consumer_type = strtolower($consumer_type);
     }
 
     /**

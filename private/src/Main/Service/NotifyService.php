@@ -44,7 +44,7 @@ class NotifyService extends BaseService {
         $condition = array('device'=> array_intersect_key($options, array_flip($allowed)));
 
         $skip = ($options['page']-1)*$options['limit'];
-        $select = array("preview_content", "preview_header", "object", "opened");
+        $select = array("preview_content", "preview_header", "object", "opened", "created_at");
 
         $cursor = $this->collection
             ->find($condition, $select)
