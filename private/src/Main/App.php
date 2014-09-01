@@ -6,7 +6,7 @@
  * Time: 4:41 PM
  */
 
-namespace Pla2;
+namespace Main;
 
 use Mandango\Cache\FilesystemCache;
 use Mandango\Connection;
@@ -14,7 +14,8 @@ use Mandango\Mandango;
 use Pla2\Entity\Mapping\MetadataFactory;
 
 class App {
-    public function createMandango(){
-
+    public static function start(){
+        \Main\AutoRoute::dispatch();
+        datefmt_set_timezone('Asia/Bangkok');
     }
 }

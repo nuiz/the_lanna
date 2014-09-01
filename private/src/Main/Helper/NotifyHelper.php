@@ -36,12 +36,13 @@ class NotifyHelper {
             if(!$item['admit'])
                 continue;
 
-            if(is_array($message)){
-                $message = $message[$item['lang']];
+            $pushMessage = $message;
+            if(is_array($pushMessage)){
+                $pushMessage = $message[$item['lang']];
             }
 
-            if(strlen(utf8_encode($message)) > 120){
-                $message = mb_substr($message, 0, 18, 'utf-8').'...';
+            if(strlen(utf8_encode($pushMessage)) > 120){
+                $pushMessage = mb_substr($pushMessage, 0, 18, 'utf-8').'...';
             }
 
             $args = array(
@@ -51,18 +52,25 @@ class NotifyHelper {
 
             if($item['type']=='ios'){
                 try {
-                    self::getApnHelper()->send($item['key'], $message, $objectUrl);
-                }catch (\Exception $e){
-                    var_dump($e);
-                    exit();
+                    self::getApnHelper()->send($item['key'], $pushMessage, $objectUrl);
+                }
+                catch (\Exception $e){
+                    error_log($e->getMessage());
                 }
             }
-            else{
+            else if($item['type']=='android'){
                 $gcmTokens = array($item['key']);
-                GCMHerlper::send($gcmTokens, array(
-                    'preview_content'=> $message,
-                    'args'=> $args
-                ));
+                $obj = $args;
+                $obj['type'] = 'news';
+                try {
+                    GCMHerlper::send($gcmTokens, array(
+                        'message'=> $pushMessage,
+                        'object'=> $obj
+                    ));
+                }
+                catch(\Exception $e){
+                    error_log($e->getMessage());
+                }
             }
         }
     }
@@ -87,7 +95,7 @@ class NotifyHelper {
                 'type'=> $deviceType
             ),
             'opened'=> false,
-            'create_at'=> $now
+            'created_at'=> $now
         );
 
         $db->notify->insert($entity);

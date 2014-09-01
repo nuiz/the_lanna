@@ -65,6 +65,8 @@ class NotifyService extends BaseService {
             unset($item['object']['_id']);
             $item['id'] = $item['_id']->{'$id'};
             unset($item['_id']);
+
+            $item['created_at'] = date('Y-m-d H:i:s', $item['created_at']->sec);
             $data[] = $item;
         }
 
@@ -83,14 +85,10 @@ class NotifyService extends BaseService {
         if(is_null($ctx))
             $ctx = $this->getCtx();
 
-        $default = array(
-            "page"=> 1,
-            "limit"=> 15
-        );
-        $options = array_merge($default, $params);
+        $options = $params;
 
         $allowed = array('key', 'type');
-        $condition = array_intersect_key($options, array_flip($allowed));
+        $condition = array('device'=> array_intersect_key($options, array_flip($allowed)));
         $condition['opened'] = false;
 
         $count = $this->collection

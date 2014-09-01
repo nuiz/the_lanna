@@ -78,7 +78,6 @@ class NodeService extends BaseService {
         $skip = ($options['page']-1)*$options['limit'];
         //$select = array("name", "detail", "feature", "price", "pictures");
         $condition = array('parent'=> null);
-
         if(isset($options['params']['parent_id'])){
             $parentId = $options['params']['parent_id'];
             if(!($parentId instanceof \MongoId))
@@ -127,15 +126,40 @@ class NodeService extends BaseService {
             $data[] = $item;
         }
 
-        return array(
+        $res = [
             'length'=> $length,
             'total'=> $total,
             'data'=> $data,
-            'paging'=> array(
+            'paging'=> [
                 'page'=> (int)$options['page'],
                 'limit'=> (int)$options['limit']
-            )
-        );
+            ]
+        ];
+
+        if($ctx->getConsumerType()=='admin'){
+            $node = array(
+                'parent'=> null
+            );
+            if(isset($options['params']['parent_id'])){
+                $parentId = $options['params']['parent_id'];
+                if(!($parentId instanceof \MongoId))
+                    $parentId = new \MongoId($parentId);
+
+                $condition['parent'] = \MongoDBRef::create("folders", $parentId);
+
+                // set node
+                $parent = $this->collection->findOne(array('_id'=> $parentId));
+                if(is_null($parent['parent'])){
+                    $node['parent'] = URL::absolute('/node');
+                }
+                else{
+                    $node['parent'] = URL::absolute('/node/'.$parent['parent']['$id']->{'$id'}.'/children');
+                }
+            }
+            $res['node'] = $node;
+        }
+
+        return $res;
     }
 
     public function sort($param, ContextInterface $ctx = null){

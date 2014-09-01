@@ -190,6 +190,11 @@ class RoomTypeService extends BaseService {
 
     public function add($params, ContextInterface $ctx = null){
         $pictures = array();
+
+        if(!isset($params['pictures']) || count($params['pictures']) == 0){
+            return ResponseHelper::notFound("Require pictures");
+        }
+
         if(isset($params['pictures'])){
             $pictures = $params['pictures'];
         }

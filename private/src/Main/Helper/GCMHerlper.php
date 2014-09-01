@@ -17,7 +17,6 @@ class GCMHerlper {
 
         $registatoin_ids = $tokens;
 
-
         // Set POST variables
         $url = 'https://android.googleapis.com/gcm/send';
 

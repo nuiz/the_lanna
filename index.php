@@ -8,4 +8,4 @@
 
 require_once 'bootstrap.php';
 
-\Main\AutoRoute::dispatch();
+\Main\App::start();
