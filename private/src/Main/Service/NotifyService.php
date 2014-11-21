@@ -44,13 +44,13 @@ class NotifyService extends BaseService {
         $condition = array('device'=> array_intersect_key($options, array_flip($allowed)));
 
         $skip = ($options['page']-1)*$options['limit'];
-        $select = array("preview_content", "preview_header", "object", "opened", "created_at");
+        $select = ["preview_content", "preview_header", "object", "opened", "created_at"];
 
         $cursor = $this->collection
             ->find($condition, $select)
             ->limit($options['limit'])
             ->skip($skip)
-            ->sort(array('create_at'=> -1));
+            ->sort(array('created_at'=> -1));
 
         $total = $this->collection->count($condition);
         $length = $cursor->count(true);
@@ -70,31 +70,23 @@ class NotifyService extends BaseService {
             $data[] = $item;
         }
 
-        return array(
+        return [
             'length'=> $length,
             'total'=> $total,
             'data'=> $data,
-            'paging'=> array(
+            'paging'=> [
                 'page'=> (int)$options['page'],
                 'limit'=> (int)$options['limit']
-            )
-        );
+            ]
+        ];
     }
 
     public function unopenedCount($params, ContextInterface $ctx = null){
-        if(is_null($ctx))
-            $ctx = $this->getCtx();
-
-        $options = $params;
-
-        $allowed = array('key', 'type');
-        $condition = array('device'=> array_intersect_key($options, array_flip($allowed)));
-        $condition['opened'] = false;
-
-        $count = $this->collection
-            ->count($condition);
-
-        return array('length'=> $count);
+        $item = DeviceService::instance()->get($params);
+        if(!isset($item['display_notify_number'])){
+            return $item;
+        }
+        return ['length'=> $item['display_notify_number']];
     }
 
     public function opened($id, ContextInterface $ctx = null){

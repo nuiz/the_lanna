@@ -17,6 +17,7 @@ class NotifyHelper {
     protected static function getApnHelper(){
         if(is_null(self::$apnHelper)){
             self::$apnHelper = new APNHelper(file_get_contents('private/apple/dev.pem'), 'gateway.sandbox.push.apple.com', 2195);
+//            self::$apnHelper = new APNHelper(file_get_contents('private/apple/pro.pem'), 'gateway.push.apple.com', 2195);
         }
         return self::$apnHelper;
     }
@@ -45,14 +46,16 @@ class NotifyHelper {
                 $pushMessage = mb_substr($pushMessage, 0, 18, 'utf-8').'...';
             }
 
-            $args = array(
+            $args = [
                 'id'=> $entity['id'],
                 'object_id'=> $entity['object']['id']
-            );
+            ];
 
             if($item['type']=='ios'){
                 try {
-                    self::getApnHelper()->send($item['key'], $pushMessage, $objectUrl);
+                    $device = $db->devices->findOne(['key'=> $item['key'], 'type'=> $item['type']]);
+                    $badge = $device['display_notify_number'];
+                    self::getApnHelper()->send($item['key'], $pushMessage, $objectUrl, $badge);
                 }
                 catch (\Exception $e){
                     error_log($e->getMessage());
@@ -72,6 +75,15 @@ class NotifyHelper {
                     error_log($e->getMessage());
                 }
             }
+        }
+    }
+
+    public static function clearBadge($deviceToken){
+        try{
+            self::getApnHelper()->sendClearBadge($deviceToken);
+        }
+        catch (\Exception $e){
+            error_log($e->getMessage());
         }
     }
 
@@ -99,6 +111,10 @@ class NotifyHelper {
         );
 
         $db->notify->insert($entity);
+        $db->devices->update(
+            ['key'=> $deviceKey, 'type'=> $deviceType],
+            ['$inc'=> ['display_notify_number'=> 1]]
+        );
         return $entity;
     }
 }

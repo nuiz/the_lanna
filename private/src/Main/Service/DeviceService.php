@@ -11,6 +11,7 @@ namespace Main\Service;
 
 use Main\Context\ContextInterface;
 use Main\DB;
+use Main\Helper\NotifyHelper;
 use Main\Helper\ResponseHelper;
 
 class DeviceService extends BaseService {
@@ -140,7 +141,27 @@ class DeviceService extends BaseService {
                 $entity['lang'] = 'en';
             }
             $entity['lang'] = strtolower($entity['lang']);
+            $entity['display_notify_number'] = 0;
             $this->collection->insert($entity);
+        }
+        return $entity;
+    }
+
+    public function clearDisplayNotificationNumber($params, ContextInterface $ctx = null){
+        $allowed = array('type', 'key');
+        $condition = array_intersect_key($params, array_flip($allowed));
+        if(!isset($params['type'])){
+            return ResponseHelper::error('Require parameter type');
+        }
+        if(!isset($params['key'])){
+            return ResponseHelper::error('Require parameter key');
+        }
+
+        $this->collection->update($condition, ['$set'=> ['display_notify_number'=> 0]]);
+        $entity = $this->get($condition);
+
+        if($params['type']=='ios'){
+            NotifyHelper::clearBadge($params['key']);
         }
         return $entity;
     }

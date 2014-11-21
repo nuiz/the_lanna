@@ -69,18 +69,20 @@ class APNHelper {
         return $path;
     }
 
-    protected function makePayload($message, $args){
+    protected function makePayload($message, $args, $badge){
         return array(
             'aps'=> array(
-                'alert'=> $message
+                'alert'=> $message,
+                'sound'=> 'default',
+                'badge'=> $badge
             ),
             'args' => $args
         );
     }
 
-    protected function getBinaryMessage($deviceToken, $message, $args)
+    protected function getBinaryMessage($deviceToken, $message, $args, $badge)
     {
-        $encodedPayload = json_encode($this->makePayload($message, $args));
+        $encodedPayload = json_encode($this->makePayload($message, $args, $badge));
 
         return chr(0).
             chr(0).
@@ -101,8 +103,27 @@ class APNHelper {
         return fwrite($this->getApnsResource(), $binaryMessage);
     }
 
-    public function send($deviceToken, $message, $args){
-        $binaryMessage = $this->getBinaryMessage($deviceToken, $message, $args);
+    public function send($deviceToken, $message, $args, $badge){
+        $binaryMessage = $this->getBinaryMessage($deviceToken, $message, $args, $badge);
+        return $this->write($binaryMessage);
+    }
+
+    public function sendClearBadge($deviceToken){
+        $payload = array(
+            'aps'=> array(
+                'badge'=> 0
+            )
+        );
+
+        $encodedPayload = json_encode($payload);
+
+        $binaryMessage = chr(0).
+            chr(0).
+            chr(32).
+            pack('H*', $deviceToken).
+            chr(0).chr(strlen($encodedPayload)).
+            $encodedPayload;
+
         return $this->write($binaryMessage);
     }
 }

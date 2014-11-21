@@ -44,7 +44,6 @@ class ServiceService extends BaseService {
         if(!$ctx->isAdminConsumer()){
             $entity['name'] = $entity['name'][$ctx->getLang()];
             $entity['detail'] = $entity['detail'][$ctx->getLang()];
-            $entity['feature'] = $entity['feature'][$ctx->getLang()];
         }
 
         $picsRef = $entity['pictures'];
@@ -67,8 +66,6 @@ class ServiceService extends BaseService {
         $entity['node'] = array(
             'pictures'=> URL::absolute('/service/'.$entity['id'].'/pictures')
         );
-
-        unset($entity['feature']);
 
         return $entity;
     }
@@ -127,7 +124,7 @@ class ServiceService extends BaseService {
             $_id = new \MongoId($_id);
         }
 
-        $entity = $params;
+        $entity = array_intersect_key($params, array_flip(['name', 'detail', 'price']));
 
         if(isset($params['parent_id'])){
             if($params['parent_id'] === 0 || $params['parent_id'] === null){
@@ -151,7 +148,7 @@ class ServiceService extends BaseService {
         }
 
         if(isset($set['price']) &&($set['price'] == 0 || $set['price'] == '')){
-            $set['price'] = null;
+            $entity['price'] = null;
         }
 
         // unset pictures for protected edit pictures
@@ -169,7 +166,7 @@ class ServiceService extends BaseService {
         // Node service update
         NodeService::instance()->addOrEdit($entity, $entity['type'], $ctx);
 
-        return $this->get($_id);
+        return $this->get($_id, $ctx);
     }
 
     public function delete($_id, ContextInterface $ctx = null){
@@ -192,7 +189,7 @@ class ServiceService extends BaseService {
         if(is_null($ctx))
             $ctx = $this->getCtx();
 
-        $select = array("_id", "detail", "feature", "price", "pictures");
+        $select = array("_id", "detail", "price", "pictures");
 
         if(!($id instanceof \MongoId)){ $id = new \MongoId($id); }
 

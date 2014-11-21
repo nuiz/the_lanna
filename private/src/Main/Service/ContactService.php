@@ -57,7 +57,7 @@ class ContactService extends BaseService {
             $entity = $this->insertWhenEmpty($ctx);
         }
 
-        $set = array("phone"=> "", "website"=> "", "email"=> "", "picture"=> "");
+        $set = array("phone"=> "", "website"=> "", "email"=> "", "picture"=> "", "fax"=> "");
         $set = array_intersect_key($param, $set);
         if(count($set)==0){
             return $entity;
@@ -79,6 +79,7 @@ class ContactService extends BaseService {
 
         $entity = array(
             "phone"=> "088-888-8888",
+            "fax"=> "053-333-333",
             "website"=> "http://www.example.com",
             "email"=> "example@example.com",
             "picture"=> null

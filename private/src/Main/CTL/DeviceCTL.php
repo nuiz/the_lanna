@@ -27,4 +27,12 @@ class DeviceCTL extends BaseCTL {
     public function edit(){
         return DeviceService::instance()->edit($this->reqInfo->inputs());
     }
+    /**
+     * @POST
+     * @GET
+     * @uri /reset/display_notify_number
+     */
+    public function clearNotifyNumber(){
+        return DeviceService::instance()->clearDisplayNotificationNumber($this->reqInfo->inputs());
+    }
 }

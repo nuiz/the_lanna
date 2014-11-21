@@ -172,15 +172,26 @@ class FeedService extends BaseService {
             $data[] = $item;
         }
 
-        return array(
+        $res = [
             'length'=> $length,
             'total'=> $total,
             'data'=> $data,
-            'paging'=> array(
+            'paging'=> [
                 'page'=> (int)$options['page'],
                 'limit'=> (int)$options['limit']
-            )
-        );
+            ]
+        ];
+
+        $pagingLength = $total/(int)$options['limit'];
+        $pagingLength = floor($pagingLength)==$pagingLength? floor($pagingLength): floor($pagingLength) + 1;
+        $res['paging']['length'] = $pagingLength;
+        $res['paging']['current'] = (int)$options['page'];
+        if(((int)$options['page'] * (int)$options['limit']) < $total){
+            $nextQueryString = http_build_query(['page'=> (int)$options['page']+1, 'limit'=> (int)$options['limit']]);
+            $res['paging']['next'] = URL::absolute('/feed'.'?'.$nextQueryString);
+        }
+
+        return $res;
     }
 
     public function sort($param, ContextInterface $ctx = null){

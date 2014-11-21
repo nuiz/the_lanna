@@ -15,7 +15,7 @@ use Pla2\Entity\Mapping\MetadataFactory;
 
 class App {
     public static function start(){
+        date_default_timezone_set('Asia/Bangkok');
         \Main\AutoRoute::dispatch();
-        datefmt_set_timezone('Asia/Bangkok');
     }
 }

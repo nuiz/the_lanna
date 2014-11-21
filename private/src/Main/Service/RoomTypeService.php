@@ -231,7 +231,12 @@ class RoomTypeService extends BaseService {
         if(is_null($ctx))
             $ctx = $this->getCtx();
 
-        $set = $params;
+        if(!($id instanceof \MongoId)){
+            $id = new \MongoId($id);
+        }
+
+        $set = array_intersect_key($params, array_flip(['name', 'detail', 'feature']));
+
         if(isset($set['pictures'])){
             unset($set['pictures']);
         }
